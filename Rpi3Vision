@@ -1,0 +1,39 @@
+import cv2
+import numpy as np
+
+cap = cv2.VideoCapture(1)
+
+while True:
+    _, frame = cap.read()
+    blur = cv2.GaussianBlur(frame, (5, 5), 0)
+    hsv = cv2.cvtColor(blur, cv2.COLOR_BGR2HSV)
+    # lower_green = np.array([40,70,70])
+    # upper_green = np.array([80,200,200])
+    # lower_green = np.array([50,100,175])
+    # upper_green = np.array([100,255,255])
+    lower_green = np.array([50, 100, 100])
+    upper_green = np.array([100, 255, 255])
+    mask = cv2.inRange(hsv, lower_green, upper_green)
+    blurred_mask = cv2.GaussianBlur(mask, (5, 5), 0)
+    M = cv2.moments(blurred_mask)
+    m00 = M['m00']
+    if (m00 != 0):
+        centroid_x = int(M['m10'] / m00)
+        centroid_y = int(M['m01'] / m00)
+    else:
+        centroid_x = -1
+        centroid_y = -1
+    if (centroid_x != -1 & centroid_y != -1):
+        center = (centroid_x, centroid_y)
+        cv2.circle(frame, center, 4, (255, 0, 0))
+    print (str(centroid_x) + ", " + str(centroid_y))
+
+    cv2.imshow('RoboVision', frame)
+    cv2.imshow('mask', blurred_mask)
+
+    k = cv2.waitKey(5) & 0xFF
+    if k == 27:
+        break
+
+cv2.destroyAllWindows()
+cap.release()
