@@ -4,19 +4,27 @@ import numpy as np
 cap = cv2.VideoCapture(1)
 
 while True:
+    # Reading in captured image from the USB camera
     _, frame = cap.read()
+    # Applying Gaussian blur to filter out noise
     blur = cv2.GaussianBlur(frame, (5, 5), 0)
     hsv = cv2.cvtColor(blur, cv2.COLOR_BGR2HSV)
     # lower_green = np.array([40,70,70])
     # upper_green = np.array([80,200,200])
     # lower_green = np.array([50,100,175])
     # upper_green = np.array([100,255,255])
+    # Setting HSV filter thresholds
     lower_green = np.array([50, 100, 100])
     upper_green = np.array([100, 255, 255])
+    # creating mask --> b/w bit image
     mask = cv2.inRange(hsv, lower_green, upper_green)
+    # Applying Gaussian blur to filter out noise
     blurred_mask = cv2.GaussianBlur(mask, (5, 5), 0)
+    # Calculating the moments of the mask
     M = cv2.moments(blurred_mask)
+    # Calculating the area
     m00 = M['m00']
+    
     if (m00 != 0):
         centroid_x = int(M['m10'] / m00)
         centroid_y = int(M['m01'] / m00)
